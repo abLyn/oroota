@@ -2,21 +2,21 @@ import Link from 'next/link'
 import { sort } from 'fast-sort'
 import prisma from '@/prisma/PrismaClient'
 
-interface Patient {
-  id: string
-  firstname: string
-  lastname: string
-}
-
 interface Props {
   sortOrder: string
   query: string
 }
 
 const PatientsTable = async ({ sortOrder, query }: Props) => {
+  if (!query) {
+    query = ''
+  }
   const patients = await prisma.patient.findMany({
     where: {
-      firstname: { startsWith: query },
+      OR: [
+        { firstname: { startsWith: query } },
+        { lastname: { startsWith: query } },
+      ],
     },
   })
 
@@ -26,7 +26,7 @@ const PatientsTable = async ({ sortOrder, query }: Props) => {
       : (patient) => patient.lastname
   )
   return (
-    <table className="table table-bordred">
+    <table className="table table-bordred text-white">
       <thead>
         <tr>
           <th className="text-xl">
